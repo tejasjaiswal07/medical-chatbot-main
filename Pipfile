@@ -4,14 +4,18 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-streamlit = "*"
+streamlit = "==1.32.0"
 langchain = "==0.1.0"
 langchain-community = "==0.0.13"
-langchain-huggingface = "==0.0.1"
 faiss-cpu = "==1.7.4"
-pypdf = "==3.17.1"
-sentence-transformers = "*"
-python-dotenv = "*"
+pypdf = "==4.0.1"
+sentence-transformers = "==2.5.1"
+python-dotenv = "==1.0.1"
+huggingface-hub = "==0.20.3"
+transformers = "==4.38.2"
+torch = "==2.1.2"
+bitsandbytes = "==0.42.0"
+accelerate = "==0.27.2"
 
 [dev-packages]
 

@@ -1,15 +1,20 @@
 import os
 import streamlit as st
-
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain.chains import RetrievalQA
-
 from langchain_community.vectorstores import FAISS
-from langchain_core.prompts import PromptTemplate
-from langchain_huggingface import HuggingFaceEndpoint
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.llms import HuggingFacePipeline
+from langchain.chains import ConversationalRetrievalChain
+from langchain.memory import ConversationBufferMemory
+from langchain.prompts import PromptTemplate
+from dotenv import load_dotenv, find_dotenv
+from pypdf import PdfReader
+import tempfile
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+import torch
 
 # Load environment variables from .env file
-from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
 DB_FAISS_PATH="vectorstore/db_faiss"
@@ -26,12 +31,22 @@ def set_custom_prompt(custom_prompt_template):
 
 
 def load_llm(huggingface_repo_id, HF_TOKEN):
-    llm=HuggingFaceEndpoint(
-        repo_id=huggingface_repo_id,
-        temperature=0.5,
-        huggingfacehub_api_token=HF_TOKEN,
-        max_new_tokens=512
+    tokenizer = AutoTokenizer.from_pretrained(huggingface_repo_id, token=HF_TOKEN)
+    model = AutoModelForCausalLM.from_pretrained(
+        huggingface_repo_id,
+        token=HF_TOKEN,
+        device_map="auto"
     )
+    pipe = pipeline(
+        "text-generation",
+        model=model,
+        tokenizer=tokenizer,
+        max_new_tokens=512,
+        temperature=0.5,
+        top_p=0.95,
+        repetition_penalty=1.15
+    )
+    llm = HuggingFacePipeline(pipeline=pipe)
     return llm
 
 
